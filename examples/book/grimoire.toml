@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: LGPL-3.0-only
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
+#
+# The demo book for grimoire-mermaid. Build it from this directory with a
+# Grimoire that offers the `files` feature (0.5.0 or later):
+#
+#   grimoire build
+#
+# `scripts/check-example.sh` builds it and checks every edition.
+
+[book]
+title = "Diagrams"
+description = "Three Mermaid diagrams, drawn while the book is built."
+authors = ["mplx"]
+language = "en"
+
+[build]
+src = "docs"
+out = "site"
+
+[pdf]
+enabled = true
+# The PNGs are drawn at twice their size, so twice the dpi prints them at it.
+imageDpi = 192
+
+# The launcher in this repository, so the example needs nothing installed but
+# Grimoire and a renderer. An installed plugin needs only the table name.
+[preprocessor.mermaid]
+command = "../../bin/grimoire-mermaid"
+
+[renderer.epub]
+output = "diagrams.epub"

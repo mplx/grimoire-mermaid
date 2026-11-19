@@ -1,0 +1,25 @@
+# The app manifest. Grimoire-mermaid is a program, a Grimoire plugin, rather
+# than a library: `jvc app install` unpacks the tree and links `bin` onto PATH
+# under the package name, which is the command Grimoire looks for when a book
+# writes `[preprocessor.mermaid]`. Renaming the package renames the command.
+
+[package]
+name = "grimoire-mermaid"
+version = "0.1.0"
+description = "A Grimoire preprocessor that draws mermaid fences as SVG and PNG while the book is built"
+license = "LGPL-3.0-only"
+authors = ["mplx <mplx@jennifer-lang.dev>"]
+keywords = ["grimoire", "grimoire-plugin", "mermaid", "diagrams", "documentation"]
+# exec: the renderer is a separate program, and so is fc-match.
+capabilities = ["exec"]
+bin = "bin/grimoire-mermaid"
+
+[package.urls]
+deck = "https://raw.githubusercontent.com/mplx/grimoire-mermaid/main/deck.toml"
+homepage = "https://github.com/mplx/grimoire-mermaid"
+
+[engines]
+jennifer = ">=0.26.0"
+
+# No [decks]: the plugin kit (`src/pluginkit.j`) is a copy of Grimoire's one-file
+# kit, not a dependency on the whole Grimoire deck.

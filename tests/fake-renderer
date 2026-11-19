@@ -1,0 +1,62 @@
+#!/bin/sh
+# SPDX-License-Identifier: LGPL-3.0-only
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
+#
+# A stand-in for merman-cli and mmdr, for src/mermaid_test.j. It takes either
+# command line, reads the diagram on stdin and writes a small text file where
+# `-o` says, recording the arguments in it so a test can see what it was asked.
+#
+# The diagram steers it:
+#   BROKEN  exit 1 with a two-line message on stderr, as a real renderer does
+#   SLOW    sleep first, so a later diagram finishes before an earlier one
+#   SILENT  exit 0 and write nothing
+#
+# FAKE_RENDERER_DIR, when set, is where each call leaves a mark while it runs
+# and appends how many were running at once to `peak`.
+
+if [ "${1:-}" = "--version" ]; then
+    echo "fake-renderer 1.0"
+    exit 0
+fi
+
+out=""
+format="svg"
+size=""
+args="$*"
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -o) out=$2; shift ;;
+        -f|-e) format=$2; shift ;;
+        --size) size=1 ;;
+    esac
+    shift
+done
+
+diagram=$(cat)
+
+if [ -n "${FAKE_RENDERER_DIR:-}" ]; then
+    mark="$FAKE_RENDERER_DIR/run.$$"
+    : > "$mark"
+    ls "$FAKE_RENDERER_DIR" | grep -c '^run\.' >> "$FAKE_RENDERER_DIR/peak"
+    sleep 0.3
+    rm -f "$mark"
+fi
+
+case "$diagram" in *SLOW*) sleep 0.5 ;; esac
+case "$diagram" in
+    *BROKEN*)
+        echo "Diagram parse error: broken on purpose" >&2
+        echo "  at line 2" >&2
+        exit 1 ;;
+esac
+case "$diagram" in *SILENT*) exit 0 ;; esac
+
+if [ -n "$size" ]; then
+    echo '{"width": 100.5, "height": 40}'
+    exit 0
+fi
+
+{
+    echo "$format: $args"
+    printf '%s\n' "$diagram"
+} > "$out"

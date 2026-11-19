@@ -1,0 +1,11 @@
+# The example book's build output
+examples/book/site/
+
+# jvc vendor tree
+vendor/
+.jvc/
+
+# Editors and operating systems
+*.swp
+*~
+.DS_Store

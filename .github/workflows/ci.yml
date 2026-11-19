@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: LGPL-3.0-only
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
+#
+# Formatting, lint and the unit tests, on every push and pull request.
+#
+# The tests draw with tests/fake-renderer, so the job needs no renderer; the
+# tests against merman-cli and mmdr run only where those are installed. The
+# example book needs a Grimoire with the `files` feature and a renderer, and is
+# checked locally with scripts/check-example.sh.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container:
+      # The official Jennifer image. `:dev` tracks main, which the 0.26.0 floor
+      # in deck.toml needs until 0.26.0 is released. Hardcoded because
+      # `container.image` does not take the `env` context.
+      image: ghcr.io/jennifer-language/jennifer:dev
+      # The image runs as a non-root user; the checked-out workspace belongs to
+      # the runner.
+      options: --user root
+    steps:
+      # The image carries the interpreter and nothing else, git included, which
+      # actions/checkout needs.
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git
+          rm -rf /var/lib/apt/lists/*
+
+      - uses: actions/checkout@v4
+
+      - name: Show the interpreter
+        run: jennifer version
+
+      - name: Format, lint and test
+        run: scripts/test.sh
